@@ -23,14 +23,14 @@ This platform is a full-stack application built with **Next.js**, powered by **F
 
 ## ⚙️ Tech Stack
 
-| Layer        | Technology                  |
-| ------------ | --------------------------- |
-| 🧩 Frontend  |                             |
-| 🛠️ Backend  |                             |
-| 🗃️ Database |                             |
-| 🔐 Auth      |                             |
-| ☁️ Storage   |                             |
-| 🤖 AI/ML     | TF-IDF, XGBoost, OpenAI API |
+| Layer          | Technology                                                          |
+| -------------- | ------------------------------------------------------------------- |
+| Frontend       | **Next.js**, TypeScript, Tailwind CSS, Framer Motion, **shadcn/ui** |
+| Backend        | **Python** (for scraping + ML), Firebase Functions                  |
+| Database       | **Firestore** (Firebase NoSQL DB)                                   |
+| Authentication | **Firebase Auth**                                                   |
+| Cloud Storage  | **Firebase Storage** for resumes                                    |
+| AI/ML          | **TF-IDF**, **XGBoost**, **OpenAI API**                             |
 
 ---
 
@@ -106,22 +106,22 @@ The platform includes a real-time dashboard that visualizes:
 
 <table>
   <tr>
-    <td><img src="/images/dashboard-1.png" alt="Jobs per Category" width="100%"/></td>
-    <td><img src="/images/dashboard-2.png" alt="Job Locations Distribution" width="100%"/></td>
+    <td><img src="./public/images/dashboard-1.png" alt="Jobs per Category" width="100%"/></td>
+    <td><img src="./public/images/dashboard-2.png" alt="Job Locations Distribution" width="100%"/></td>
   </tr>
   <tr>
-    <td><img src="/images/dashboard-3.png" alt="Jobs Posted Over Time" width="100%"/></td>
-    <td><img src="/images/dashboard-4.png" alt="Top Hiring Locations" width="100%"/></td>
+    <td><img src="./public/images/dashboard-3.png" alt="Jobs Posted Over Time" width="100%"/></td>
+    <td><img src="./public/images/dashboard-4.png" alt="Top Hiring Locations" width="100%"/></td>
   </tr>
   <tr>
-    <td><img src="/images/dashboard-5.png" alt="Employment Type Distribution" width="100%"/></td>
-    <td><img src="/images/dashboard-6.png" alt="Jobs by Category and Employment Type" width="100%"/></td>
+    <td><img src="./public/images/dashboard-5.png" alt="Employment Type Distribution" width="100%"/></td>
+    <td><img src="./public/images/dashboard-6.png" alt="Jobs by Category and Employment Type" width="100%"/></td>
   </tr>
-</table>**
-
-> You can preview the embedded dashboard below:
+</table>
 
 ---
+
+
 
 ## 🤝 Contributing
 
@@ -129,17 +129,11 @@ We welcome contributions to enhance the platform! Here's how you can help:
 
 1. **Fork the Repository** – Start by forking the repo to your GitHub account.
 2. **Create a Feature Branch** – Use meaningful names (e.g., `feature/job-filter`).
-3. **Write Clean Code** – Use consistent naming conventions and formatting.
-4. **Test Thoroughly** – Ensure your feature doesn’t break existing functionality.
-5. **Submit a Pull Request** – Describe your changes clearly and link any related issues.
-6. **Engage** – Review other PRs, open issues, or propose ideas for new features.
+3. **Commit Changes** – Keep commits focused and atomic.
+4. **Submit a Pull Request** – Describe your changes clearly and link related issues.
+5. **Open an Issue** – Have a feature idea or bug? Let us know by opening an issue.
 
-### Development Guidelines
-
-- Follow Next.js best practices
-- Use modular components and context where needed
-- Write descriptive commit messages
-- Run `npm run lint` before submitting changes
+We follow standard practices and encourage clean, modular code. Don't forget to lint and test your changes!
 
 ---
 
@@ -147,4 +141,3 @@ We welcome contributions to enhance the platform! Here's how you can help:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-# entry_level_jobs_dashboard
