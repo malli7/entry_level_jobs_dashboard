@@ -1,8 +1,6 @@
+import type React from "react";
 import type { Metadata } from "next";
-import "./globals.css";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
   title: "Job Match - Find Entry-Level Jobs That Match Your Skills",
@@ -10,14 +8,10 @@ export const metadata: Metadata = {
     "Our AI analyzes your resume and matches you with the perfect entry-level positions from across the web",
 };
 
-export default function RootLayout({
+export default function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  );
+  return <AuthProvider>{children}</AuthProvider>;
 }
