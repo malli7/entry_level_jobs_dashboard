@@ -62,8 +62,8 @@ entry-level-job-platform/
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/entry-level-job-platform.git
-cd entry-level-job-platform
+git clone https://github.com/malli7/entry_level_jobs_dashboard.git
+cd entry_level_jobs_dashboard
 ```
 
 2. **Install frontend dependencies**
