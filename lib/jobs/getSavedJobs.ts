@@ -1,45 +1,26 @@
-const JOBS_API_URL = "/api/jobs?page_number=";
+import { collection, query, orderBy, limit, startAfter, getDocs } from "firebase/firestore"
+import { db } from "@/lib/firebase/config"
 
-const fetchJobs = async (page: string) => {
-  const cacheKey = `jobs_page_${page}`;
-  const now = Date.now();
-
-  if (typeof window !== "undefined") {
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-      const { data, timestamp } = JSON.parse(cachedData);
-      if (now - timestamp < 15 * 60 * 1000) {
-        return data;
-      } else {
-        localStorage.removeItem(cacheKey);
-      }
-    }
-  }
-
-  try {
-    const response = await fetch(`${JOBS_API_URL}${page}`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const data = await response.json();
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: now }));
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error fetching jobs:", error);
-    throw new Error("Failed to fetch jobs");
-  }
-};
+const JOBS_PER_PAGE = 20
 
 export const getJobsForPage = async (page: number) => {
   try {
-    const jobs = await fetchJobs(page.toString());
-    return jobs.slice((page - 1) * 10, page * 10); 
+    const jobsRef = collection(db, "jobs")
+    let q = query(jobsRef, orderBy("date_posted", "desc"), limit(JOBS_PER_PAGE))
+
+    if (page > 1) {
+      const lastDoc = await getDocs(query(jobsRef, orderBy("date_posted", "desc"), limit((page - 1) * JOBS_PER_PAGE)))
+      const lastVisible = lastDoc.docs[lastDoc.docs.length - 1]
+      q = query(jobsRef, orderBy("date_posted", "desc"), startAfter(lastVisible), limit(JOBS_PER_PAGE))
+    }
+
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
   } catch (error) {
-    console.error(error);
-    return [];
+    console.error("Error fetching jobs:", error)
+    return []
   }
-};
+}

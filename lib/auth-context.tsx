@@ -30,6 +30,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { FieldValue } from "firebase/firestore";
 
 interface User {
   uid: string;
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUserDocument = async (
     firebaseUser: FirebaseUser,
-    additionalData?: Record<string, any>
+    additionalData?: { [key: string]: FieldValue | Partial<unknown> | undefined }
   ) => {
     const userRef = doc(db, "users", firebaseUser.uid);
     const userSnap = await getDoc(userRef);
@@ -192,8 +193,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       await sendPasswordResetEmail(auth, email);
-    } catch (error: any) {
-      if (error.message === "No account found with this email address.") {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === "No account found with this email address.") {
         throw new Error(error.message);
       } else {
         throw new Error(

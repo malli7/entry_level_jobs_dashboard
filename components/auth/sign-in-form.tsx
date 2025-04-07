@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { FirebaseError } from "firebase/app"; // Import FirebaseError for better error typing
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -54,20 +55,22 @@ export default function SignInForm() {
       if (user.hasResume) {
         router.push("/dashboard");
       } else {
-        router.push("/resume-upload");
+        router.push("/resume");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Sign in error:", err);
 
-      if (
-        err.code === "auth/user-not-found" ||
-        err.code === "auth/wrong-password"
-      ) {
-        setError("Invalid email or password");
-      } else if (err.code === "auth/too-many-requests") {
-        setError("Too many failed login attempts. Please try again later.");
+      if (err instanceof FirebaseError) {
+        // Handle Firebase-specific errors
+        if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+          setError("Invalid email or password");
+        } else if (err.code === "auth/too-many-requests") {
+          setError("Too many failed login attempts. Please try again later.");
+        } else {
+          setError("Failed to sign in. Please try again.");
+        }
       } else {
-        setError("Failed to sign in. Please try again.");
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -85,7 +88,7 @@ export default function SignInForm() {
       if (user.hasResume) {
         router.push("/dashboard");
       } else {
-        router.push("/resume-upload");
+        router.push("/resume");
       }
     } catch (err) {
       console.error("Google sign in error:", err);
@@ -102,12 +105,17 @@ export default function SignInForm() {
     try {
       await resetPassword(resetEmail);
       setSuccess("Password reset email sent. Please check your inbox.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Reset password error:", err);
-      if (err.message === "No account found with this email address.") {
-        setError(err.message);
+
+      if (err instanceof FirebaseError) {
+        if (err.message === "No account found with this email address.") {
+          setError(err.message);
+        } else {
+          setError("Failed to send password reset email. Please try again.");
+        }
       } else {
-        setError("Failed to send password reset email. Please try again.");
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsResettingPassword(false);

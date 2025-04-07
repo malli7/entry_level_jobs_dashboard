@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { FirebaseError } from "firebase/app" // Import FirebaseError for better error typing
 
 const signUpSchema = z
   .object({
@@ -48,7 +49,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
     setError(null)
 
     try {
-      await signUpWithEmail(data.email, data.password,data.name)
+      await signUpWithEmail(data.email, data.password, data.name)
 
       setIsSuccess(true)
 
@@ -56,13 +57,18 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
       setTimeout(() => {
         if (onSuccess) onSuccess()
       }, 2000)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Sign up error:", err)
 
-      if (err.code === "auth/email-already-in-use") {
-        setError("This email is already in use. Please try signing in instead.")
+      if (err instanceof FirebaseError) {
+        // Handle Firebase-specific errors
+        if (err.code === "auth/email-already-in-use") {
+          setError("This email is already in use. Please try signing in instead.")
+        } else {
+          setError("Failed to create account. Please try again.")
+        }
       } else {
-        setError("Failed to create account. Please try again.")
+        setError("An unexpected error occurred. Please try again.")
       }
     } finally {
       setIsLoading(false)

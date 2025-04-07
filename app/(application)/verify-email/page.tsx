@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
       if (user.hasResume) {
         router.push("/dashboard")
       } else {
-        router.push("/resume-upload")
+        router.push("/resume")
       }
     }
   }, [user, router])
@@ -50,7 +50,7 @@ export default function VerifyEmailPage() {
           await updateDoc(userRef, { emailVerified: true })
           await auth.currentUser.reload()
           
-          router.push("/resume-upload")
+          router.push("/resume")
           
         } else {
           setError("Email not verified yet. Please check your inbox and spam folder.")
@@ -108,7 +108,7 @@ export default function VerifyEmailPage() {
               </div>
               <h3 className="text-xl font-medium text-white mb-2">Verification Required</h3>
               <p className="text-slate-400">
-                We've sent a verification email to <span className="text-white font-medium">{user.email}</span>
+               {" We've sent a verification email to"} <span className="text-white font-medium">{user.email}</span>
               </p>
               <p className="text-slate-400 mt-2">
                 Please check your inbox and click the verification link to activate your account.
@@ -137,7 +137,7 @@ export default function VerifyEmailPage() {
             disabled={loading}
           >
             {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-            I've Verified My Email
+           {" I've Verified My Email"}
           </Button>
 
           <Button

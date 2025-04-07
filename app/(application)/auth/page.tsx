@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import SignInForm from "@/components/auth/sign-in-form"
@@ -13,15 +13,17 @@ export default function AuthPage() {
   const { user } = useAuth()
   console.log(user)
 
-  // If user is already authenticated, redirect to dashboard or resume upload
-  if (user) {
-    if (user.hasResume) {
-      router.push("/dashboard")
-    } else {
-      router.push("/resume-upload")
+  useEffect(() => {
+    if (user) {
+      if (user.hasResume) {
+        router.push("/dashboard")
+      } else {
+        router.push("/resume")
+      }
     }
-    return null
-  }
+  }, [user, router])
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center p-4">
