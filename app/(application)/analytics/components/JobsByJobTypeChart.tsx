@@ -39,14 +39,26 @@ const JobsByJobTypeChart = ({ allJobs }: JobsByJobTypeChartProps) => {
 
   const chartData = useMemo(() => processData(allJobs), [allJobs, processData]);
 
+  const colorPalette = [
+    "rgba(255, 99, 132, 0.6)",
+    "rgba(54, 162, 235, 0.6)",
+    "rgba(255, 206, 86, 0.6)",
+    "rgba(75, 192, 192, 0.6)",
+    "rgba(153, 102, 255, 0.6)",
+    "rgba(255, 159, 64, 0.6)",
+    "rgba(201, 203, 207, 0.6)",
+  ];
+
   const barChartData = {
     labels: chartData.map((item) => item.jobType),
     datasets: [
       {
         label: "Number of Jobs by Job Type",
         data: chartData.map((item) => item.count),
-        backgroundColor: "rgba(153, 102, 255, 0.5)",
-        borderColor: "rgba(153, 102, 255, 1)",
+        backgroundColor: chartData.map((_, i) => colorPalette[i % colorPalette.length]),
+        borderColor: chartData.map((_, i) =>
+          colorPalette[i % colorPalette.length].replace("0.6", "1")
+        ),
         borderWidth: 1,
       },
     ],
@@ -73,6 +85,7 @@ const JobsByJobTypeChart = ({ allJobs }: JobsByJobTypeChartProps) => {
 
   const chartOptions = {
     responsive: true,
+    indexAxis: 'y' as const, // ✅ Horizontal bars
     plugins: {
       legend: {
         position: "top" as const,
@@ -155,7 +168,7 @@ const JobsByJobTypeChart = ({ allJobs }: JobsByJobTypeChartProps) => {
 
       <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
         <h3 className="text-xl font-semibold mb-4 text-white">Jobs by Job Type</h3>
-        <div style={{ height: "400px" }}>
+        <div style={{ height: "500px" }}>
           <Bar data={barChartData} options={chartOptions} />
         </div>
       </div>
@@ -163,4 +176,4 @@ const JobsByJobTypeChart = ({ allJobs }: JobsByJobTypeChartProps) => {
   );
 };
 
-export default JobsByJobTypeChart; 
+export default JobsByJobTypeChart;

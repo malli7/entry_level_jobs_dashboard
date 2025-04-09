@@ -1,8 +1,18 @@
 import { db } from "@/lib/firebase/config";
-import {  getDocs, collection, query, orderBy, limit, startAfter } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  deleteDoc,
+  doc,
+  Query,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { NextResponse } from "next/server";
-
-
 
 interface Job {
   category?: string;
@@ -10,61 +20,61 @@ interface Job {
   job_type?: string;
   site?: string;
   date_posted?: string;
+  company?: string;
+  title?: string;
 }
+
+const fetchValidJobs = async (page: number, pageSize: number): Promise<Job[]> => {
+  const validJobs: Job[] = [];
+  let lastVisible: QueryDocumentSnapshot<DocumentData> | null = null;
+  let attempts = 0;
+
+  while (validJobs.length < pageSize && attempts < 5) {
+    const batchSize = (pageSize - validJobs.length) + 5; // Fetch a few extras in case some are invalid
+    const baseQuery: Query = query(
+      collection(db, "jobs"),
+      orderBy("date_posted"),
+      ...(lastVisible ? [startAfter(lastVisible)] : []),
+      limit(batchSize)
+    );
+
+    const snapshot = await getDocs(baseQuery);
+    if (snapshot.empty) break;
+
+    lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+    for (const docSnap of snapshot.docs) {
+      const jobData = docSnap.data();
+
+      // Validate company and title
+      if (!jobData.company || !jobData.title) {
+        await deleteDoc(doc(db, "jobs", docSnap.id));
+        continue;
+      }
+
+      if (jobData.date_posted) {
+        const date = new Date(jobData.date_posted.seconds * 1000);
+        jobData.date_posted = date.toISOString().split("T")[0];
+      }
+
+      validJobs.push(jobData);
+
+      if (validJobs.length === pageSize) break;
+    }
+
+    attempts++;
+  }
+
+  return validJobs;
+};
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1", 20);
+    const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = 20;
 
-    let jobsQuery;
-    let jobsSnapshot;
-
-    if (page === 1) {
-      jobsQuery = query(
-        collection(db, "jobs"),
-        orderBy("date_posted"),
-        limit(pageSize)
-      );
-      jobsSnapshot = await getDocs(jobsQuery);
-    } else {
-      const firstPageQuery = query(
-        collection(db, "jobs"),
-        orderBy("date_posted"),
-        limit((page - 1) * pageSize)
-      );
-      const firstPageSnapshot = await getDocs(firstPageQuery);
-      const lastVisible = firstPageSnapshot.docs[firstPageSnapshot.docs.length - 1];
-
-      if (lastVisible) {
-        jobsQuery = query(
-          collection(db, "jobs"),
-          orderBy("date_posted"),
-          startAfter(lastVisible),
-          limit(pageSize)
-        );
-        jobsSnapshot = await getDocs(jobsQuery);
-      } else {
-        return NextResponse.json({
-          jobs: [],
-          categories: [],
-          locations: [],
-          jobTypes: [],
-          sites: [],
-        });
-      }
-    }
-
-    const jobs = jobsSnapshot.docs.map(doc => {
-      const jobData = doc.data();
-      if (jobData.date_posted) {
-        const date = new Date(jobData.date_posted.seconds * 1000);
-        const formattedDate = date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
-        jobData.date_posted = formattedDate;
-      }
-      return jobData;
-    });
+    const jobs = await fetchValidJobs(page, pageSize);
 
     const categories = new Set();
     const locations = new Set();
@@ -77,9 +87,7 @@ export async function GET(request: Request) {
       if (job.location) locations.add(job.location);
       if (job.job_type) jobTypes.add(job.job_type);
       if (job.site) sites.add(job.site);
-      if (job.date_posted) {
-        dateOptions.add(job.date_posted as string);
-      }
+      if (job.date_posted) dateOptions.add(job.date_posted);
     });
 
     return NextResponse.json({

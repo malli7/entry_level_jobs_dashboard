@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { Bar } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 import { JobForCharts } from "../page";
 import { ActiveElement, ChartEvent } from "chart.js";
 
@@ -39,34 +39,48 @@ const JobsBySiteChart = ({ allJobs }: JobsBySiteChartProps) => {
 
   const chartData = useMemo(() => processData(allJobs), [allJobs, processData]);
 
-  const barChartData = {
+  const doughnutChartData = {
     labels: chartData.map((item) => item.site),
     datasets: [
       {
         label: "Number of Jobs by Site",
         data: chartData.map((item) => item.count),
-        backgroundColor: "rgba(75, 192, 192, 0.5)",
-        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: [
+          "rgba(75, 192, 192, 0.5)",
+          "rgba(255, 99, 132, 0.5)",
+          "rgba(255, 206, 86, 0.5)",
+          "rgba(54, 162, 235, 0.5)",
+          "rgba(153, 102, 255, 0.5)",
+          "rgba(255, 159, 64, 0.5)",
+          "rgba(199, 199, 199, 0.5)",
+        ],
+        borderColor: [
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 99, 132, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)",
+          "rgba(199, 199, 199, 1)",
+        ],
         borderWidth: 1,
       },
     ],
   };
 
-  const handleBarClick = (event: ChartEvent, elements: ActiveElement[]) => {
+  const handleChartClick = (event: ChartEvent, elements: ActiveElement[]) => {
     if (elements.length > 0) {
-      const elementIndex = elements[0].index;
-      const site = chartData[elementIndex].site;
+      const index = elements[0].index;
+      const site = chartData[index].site;
 
-      const baseUrl = `/dashboard`;
       const queryParams = new URLSearchParams();
       queryParams.append("site", site);
-
       if (selectedDate) queryParams.append("datePosted", selectedDate);
       if (selectedLocation) queryParams.append("location", selectedLocation);
       if (selectedCategory) queryParams.append("category", selectedCategory);
       if (selectedJobType) queryParams.append("jobType", selectedJobType);
 
-      const fullUrl = `${baseUrl}?${queryParams.toString()}`;
+      const fullUrl = `/dashboard?${queryParams.toString()}`;
       window.location.href = fullUrl;
     }
   };
@@ -82,7 +96,7 @@ const JobsBySiteChart = ({ allJobs }: JobsBySiteChartProps) => {
         text: "Jobs by Site",
       },
     },
-    onClick: handleBarClick,
+    onClick: handleChartClick,
   };
 
   return (
@@ -156,11 +170,11 @@ const JobsBySiteChart = ({ allJobs }: JobsBySiteChartProps) => {
       <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
         <h3 className="text-xl font-semibold mb-4 text-white">Jobs by Site</h3>
         <div style={{ height: "400px" }}>
-          <Bar data={barChartData} options={chartOptions} />
+          <Doughnut data={doughnutChartData} options={chartOptions} />
         </div>
       </div>
     </div>
   );
 };
 
-export default JobsBySiteChart; 
+export default JobsBySiteChart;

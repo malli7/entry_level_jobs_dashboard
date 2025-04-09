@@ -130,7 +130,7 @@ const TimeBasedCharts = ({ allJobs }: TimeBasedChartsProps) => {
       const queryParams = new URLSearchParams();
 
       // Append the date to the query parameters
-      queryParams.append("date", date);
+      queryParams.append("datePosted", date);
 
       // Append other selected filters
       if (selectedLocation) queryParams.append("location", selectedLocation);

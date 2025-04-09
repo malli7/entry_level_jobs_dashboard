@@ -1,14 +1,18 @@
 "use client";
-import {  usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Job } from "../../page"; // Assuming Job interface is exported from the main dashboard page
 import NavigationBar from "@/app/(application)/components/NavigationBar";
+import { useAuth } from "@/lib/auth-context";
 
 export default function JobDetails() {
   const pathname = usePathname();
   const id = pathname.split("/").pop();
-  console.log(id);
   const [job, setJob] = useState<Job | null>(null);
+  const [resumeScore, setResumeScore] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<string[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { user } = useAuth(); // Assuming your auth provider gives you the user object
 
   useEffect(() => {
     if (id) {
@@ -27,6 +31,42 @@ export default function JobDetails() {
       setJob(foundJob);
     }
   }, [id]);
+
+  const handleGenerateResumeScore = async () => {
+    if (!user || !user.uid) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log(user.uid, id);
+      const response = await fetch("/api/resume-score", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          job_description: job?.description,
+          user_id: user.uid,
+          job_id: id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate resume score");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setResumeScore(data.match_score);
+      setFeedback(data.feedback);
+    } catch (error) {
+      console.error("Error generating resume score:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function formatJobDescription(description: string) {
     // Replace **text** with <strong>text</strong> and ensure it starts on a new line
@@ -70,6 +110,30 @@ export default function JobDetails() {
               }}
             />
           </div>
+          <div className="mt-6 text-white relative backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-6 shadow-[0_0_30px_rgba(0,255,255,0.2)]">
+            <button
+              onClick={handleGenerateResumeScore}
+              className="relative z-10 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:from-pink-500 hover:to-purple-600 transition-all duration-300 ease-in-out hover:scale-105"
+            >
+              {loading ? "Generating..." : "🚀 View/Generate Resume Score"}
+            </button>
+
+            {resumeScore !== null && (
+              <div className="mt-6 bg-white/5 border border-cyan-400/30 p-4 rounded-xl shadow-[0_0_20px_rgba(0,255,255,0.1)]">
+                <p className="text-cyan-300 font-semibold text-lg mb-2">
+                  ✨ Match Score:{" "}
+                  <span className="text-white">{resumeScore}</span>
+                </p>
+                {feedback?.map((feed, idx) => (
+                  <p key={idx} className="text-slate-300 ml-2">
+                    {"👉"} {feed}
+                  </p>
+                ))}
+              </div>
+            )}
+
+          </div>
+
           <a
             href={job.job_url}
             target="_blank"
