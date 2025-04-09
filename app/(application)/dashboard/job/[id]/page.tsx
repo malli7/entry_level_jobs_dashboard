@@ -111,12 +111,14 @@ export default function JobDetails() {
             />
           </div>
           <div className="mt-6 text-white relative backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-6 shadow-[0_0_30px_rgba(0,255,255,0.2)]">
-            <button
-              onClick={handleGenerateResumeScore}
+            {resumeScore === null && (
+              <button
+                onClick={handleGenerateResumeScore}
               className="relative z-10 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:from-pink-500 hover:to-purple-600 transition-all duration-300 ease-in-out hover:scale-105"
             >
-              {loading ? "Generating..." : "🚀 View/Generate Resume Score"}
-            </button>
+                {loading ? "Generating..." : "🚀 View/Generate Resume Score"}
+              </button>
+            )}
 
             {resumeScore !== null && (
               <div className="mt-6 bg-white/5 border border-cyan-400/30 p-4 rounded-xl shadow-[0_0_20px_rgba(0,255,255,0.1)]">
