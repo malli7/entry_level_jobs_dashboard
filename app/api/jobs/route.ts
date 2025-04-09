@@ -15,6 +15,7 @@ import {
 import { NextResponse } from "next/server";
 
 interface Job {
+  id?: string;
   category?: string;
   location?: string;
   job_type?: string;
@@ -24,16 +25,36 @@ interface Job {
   title?: string;
 }
 
+// Cache to store the last visible document for each page
+const pageCache = new Map<number, QueryDocumentSnapshot<DocumentData>>();
+
 const fetchValidJobs = async (page: number, pageSize: number): Promise<Job[]> => {
   const validJobs: Job[] = [];
   let lastVisible: QueryDocumentSnapshot<DocumentData> | null = null;
   let attempts = 0;
 
+  // If we're requesting page > 1, we need the last document from the previous page
+  if (page > 1) {
+    // Get the last document from the previous page
+    lastVisible = pageCache.get(page - 1) || null;
+    
+    // If we don't have the previous page cached, we need to fetch all preceding pages
+    if (!lastVisible) {
+      for (let i = 1; i < page; i++) {
+        const prevPageJobs = await fetchValidJobs(i, pageSize);
+        if (prevPageJobs.length === 0) {
+          return []; // No more results
+        }
+      }
+      lastVisible = pageCache.get(page - 1) || null;
+    }
+  }
+
   while (validJobs.length < pageSize && attempts < 5) {
     const batchSize = (pageSize - validJobs.length) + 5; // Fetch a few extras in case some are invalid
     const baseQuery: Query = query(
       collection(db, "jobs"),
-      orderBy("date_posted"),
+      orderBy("date_posted", "desc"), // Changed to desc to get newest jobs first
       ...(lastVisible ? [startAfter(lastVisible)] : []),
       limit(batchSize)
     );
@@ -42,9 +63,15 @@ const fetchValidJobs = async (page: number, pageSize: number): Promise<Job[]> =>
     if (snapshot.empty) break;
 
     lastVisible = snapshot.docs[snapshot.docs.length - 1];
+    
+    // Store the last document of this page for future requests
+    pageCache.set(page, lastVisible);
 
     for (const docSnap of snapshot.docs) {
       const jobData = docSnap.data();
+      
+      // Add document ID to job data
+      jobData.id = docSnap.id;
 
       // Validate company and title
       if (!jobData.company || !jobData.title) {

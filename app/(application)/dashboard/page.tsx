@@ -84,27 +84,36 @@ export default function DashboardPage() {
     // Check if we have this page's data in localStorage
     const storedPageData = localStorage.getItem(`jobs_page_${page}`);
     if (storedPageData) {
-      const {
-        jobs,
-        categories,
-        locations,
-        jobTypes,
-        sites,
-        dateOptions,
-        timestamp,
-      } = JSON.parse(storedPageData);
-      const fifteenMinutes = 15 * 60 * 1000;
-      if (Date.now() - timestamp < fifteenMinutes) {
-        return { jobs, categories, locations, jobTypes, sites, dateOptions };
+      try {
+        const {
+          jobs,
+          categories,
+          locations,
+          jobTypes,
+          sites,
+          dateOptions,
+          timestamp,
+        } = JSON.parse(storedPageData);
+        
+        const fifteenMinutes = 15 * 60 * 1000;
+        if (Date.now() - timestamp < fifteenMinutes) {
+          return { jobs, categories, locations, jobTypes, sites, dateOptions };
+        } 
+      } catch (error) {
+        console.error("Error parsing cached job data:", error);
+        localStorage.removeItem(`jobs_page_${page}`);
       }
     }
+    
     return await fetchJobs(page);
   }, [fetchJobs]);
 
   const loadMoreJobs = async () => {
+    setIsLoading(true);
     const nextPage = currentPage + 1;
     const data = await getJobs(nextPage);
-    if (data) {
+  
+    if (data && data.jobs && data.jobs.length > 0) {
       // Create a Set of existing job IDs to check for duplicates
       const existingJobIds = new Set(jobs.map((job) => job.id));
 
@@ -112,6 +121,12 @@ export default function DashboardPage() {
       const newJobs = data.jobs.filter(
         (job: Job) => !existingJobIds.has(job.id)
       );
+
+      if (newJobs.length === 0) {
+        console.log("No new jobs to display");
+        setIsLoading(false);
+        return;
+      }
 
       // Create Sets for existing categories, locations, etc.
       const existingCategories = new Set(categories);
@@ -145,7 +160,10 @@ export default function DashboardPage() {
       setSites((prevSites) => [...prevSites, ...newSites]);
       setDateOptions((prevDates) => [...prevDates, ...newDates]);
       setCurrentPage(nextPage);
+    } else {
+      console.log("No more jobs available");
     }
+    setIsLoading(false);
   };
 
   const filterJobs = () => {
