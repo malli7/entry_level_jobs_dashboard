@@ -116,11 +116,6 @@ The platform works best when you keep your profile and resume updated to ensure 
         <img src="./public/images/dashboard-3.png" alt="Jobs Posted Over Time" width="100%"/>
         <p>Track job posting trends with time-series visualization</p>
       </td>
-      <td align="center">
-        <img src="./public/images/dashboard-4.png" alt="Top Hiring Locations" width="100%"/>
-        <p><strong>Top Hiring Locations</strong></p>
-        <p>Identify regions with the highest concentration of opportunities</p>
-      </td>
     </tr>
   </table>
   
