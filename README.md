@@ -296,6 +296,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>Built with ❤️ for job seekers at all stages of their career journey</p>
-  <p>© 2024 Entry-Level Jobs Dashboard</p>
+  <p>© 2025 Entry-Level Jobs Dashboard</p>
 </div>
 
